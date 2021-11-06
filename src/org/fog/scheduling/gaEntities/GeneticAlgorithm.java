@@ -6,7 +6,6 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.fog.entities.FogDevice;
 import org.fog.scheduling.SchedulingAlgorithm;
-import org.fog.scheduling.localSearchAlgorithm.Pair;
 
 /**
  * The GeneticAlgorithm class is our main abstraction for managing the
@@ -33,14 +32,14 @@ import org.fog.scheduling.localSearchAlgorithm.Pair;
  *
  */
 public class GeneticAlgorithm {
-        private int populationSize;
+        private final int POPULATION_SIZE;
 
         /**
          * Mutation rate is the fractional probability than an individual gene will
          * mutate randomly in a given generation. The range is 0.0-1.0, but is
          * generally small (on the order of 0.1 or less).
          */
-        private double mutationRate;
+        private final double MUTATION_RATE;
 
         /**
          * Crossover rate is the fractional probability that two individuals will
@@ -48,14 +47,14 @@ public class GeneticAlgorithm {
          * offspring with traits of each of the parents. Like mutation rate the
          * rance is 0.0-1.0 but small.
          */
-        private double crossoverRate;
+        private final double CROSSOVER_RATE;
 
         /**
          * Elitism is the concept that the strongest members of the population
          * should be preserved from generation to generation. If an individual is
          * one of the elite, it will not be mutated or crossover.
          */
-        private int elitismCount;
+        private final int ELITISM_COUNT;
 
         private double minTime;
         private double minCost;
@@ -63,11 +62,12 @@ public class GeneticAlgorithm {
 
 
         public GeneticAlgorithm(int populationSize, double mutationRate, double crossoverRate, int elitismCount) {
-                this.populationSize = populationSize;
-                this.mutationRate = mutationRate;
-                this.crossoverRate = crossoverRate;
-                this.elitismCount = elitismCount;
+                this.POPULATION_SIZE = populationSize;
+                this.MUTATION_RATE = mutationRate;
+                this.CROSSOVER_RATE = crossoverRate;
+                this.ELITISM_COUNT = elitismCount;
         }
+
         /**
          * calculate the lower boundary of time and cost
          *
@@ -129,7 +129,7 @@ public class GeneticAlgorithm {
          */
         public Population initPopulation(int chromosomeLength, int maxValue) {
                 // Initialize population
-                Population population = new Population(this.populationSize, chromosomeLength, maxValue);
+                Population population = new Population(this.POPULATION_SIZE, chromosomeLength, maxValue);
                 return population;
         }
 
@@ -298,7 +298,7 @@ public class GeneticAlgorithm {
                         Individual parent1 = population.getFittest(populationIndex);
 
                         // Apply crossover to this individual?
-                        if (this.crossoverRate > Math.random()) {
+                        if (this.CROSSOVER_RATE > Math.random()) {
                                 // Initialize offspring
                                 Individual offspring = new Individual(parent1.getChromosomeLength());
 
@@ -418,7 +418,7 @@ public class GeneticAlgorithm {
                 // Loop over current population by fitness
                 for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
                         // if the current individual is selected to mutation phase
-                        if (this.mutationRate > Math.random() && populationIndex >= this.elitismCount) {
+                        if (this.MUTATION_RATE > Math.random() && populationIndex >= this.ELITISM_COUNT) {
                                 Individual individual = population.getFittest(populationIndex);
                                 individual.setGene(Service.rand(0, individual.getChromosomeLength() - 1), Service.rand(0, individual.getMaxValue()));
 
@@ -557,11 +557,11 @@ public class GeneticAlgorithm {
                 Population newPopulation = new Population();
 
                 // Copy some individuals to population of next generation
-                int numberOfParentPairs = (int) (population.size() * this.crossoverRate / 2);
+                int numberOfParentPairs = (int) (population.size() * this.CROSSOVER_RATE / 2);
                 int numberOfCopyIndividuals = population.size() - 2 * numberOfParentPairs;
 
                 for(int index = 0; index < numberOfCopyIndividuals; index++) {
-                        if(index < this.elitismCount) {
+                        if(index < this.ELITISM_COUNT) {
                                 newPopulation.getPopulation().add(population.getFittest(index));
                         } else {
                                 Individual individual = this.selectIndividual(population);
@@ -600,7 +600,7 @@ public class GeneticAlgorithm {
                 // Loop over current population by fitness
                 for (int populationIndex = 0; populationIndex < newPopulation.size(); populationIndex++) {
                         // if the current individual is selected to mutation phase
-                        if (this.mutationRate > Math.random() && populationIndex >= this.elitismCount) {
+                        if (this.MUTATION_RATE > Math.random() && populationIndex >= this.ELITISM_COUNT) {
                                 Individual individual = newPopulation.getFittest(populationIndex);
                                 individual.setGene(Service.rand(0, individual.getChromosomeLength() - 1),
                                                 Service.rand(0, individual.getMaxValue()));

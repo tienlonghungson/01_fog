@@ -9,7 +9,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
-import org.fog.scheduling.gaEntities.Service;	
+import org.fog.scheduling.gaEntities.Service;
 
 public class CloudletCreation {
 

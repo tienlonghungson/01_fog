@@ -26,7 +26,7 @@ public class MyGeneticAlgorithm {
 	 * 
 	 * @param populationSize
 	 * @param offspringSize
-	 * @param mutationRate
+	 * @param mutatingSize
 	 */
 	public MyGeneticAlgorithm (int populationSize, int offspringSize, double mutatingSize) {
 		this.populationSize = populationSize;

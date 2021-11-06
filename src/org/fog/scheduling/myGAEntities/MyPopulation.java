@@ -13,12 +13,10 @@ public class MyPopulation {
 
 	/**
 	 * Initializes blank population of individuals
-	 * 
-	 * @param populationSize : The number of individuals in the population
 	 */
 	public MyPopulation() {
 		// Initial population
-		this.population = new ArrayList<MyIndividual>();
+		this.population = new ArrayList<>();
 	}
 	
 	

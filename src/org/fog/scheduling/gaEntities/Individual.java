@@ -74,9 +74,8 @@ public class Individual {
 	/**
 	 * Set gene at offset
 	 * 
-	 * @param gene
-	 * @param offset
-	 * @return gene
+	 * @param gene new gene value
+	 * @param offset distance from 1st gene
 	 */
 	public void setGene(int offset, int gene) {
 		this.chromosome[offset] = gene;
@@ -85,7 +84,7 @@ public class Individual {
 	/**
 	 * Get gene at offset
 	 * 
-	 * @param offset
+	 * @param offset distance from 1st gene
 	 * @return gene
 	 */
 	public int getGene(int offset) {
@@ -99,7 +98,4 @@ public class Individual {
 	public void setMaxValue(int maxValue) {
 		this.maxValue = maxValue;
 	}
-
-	
-	
 }

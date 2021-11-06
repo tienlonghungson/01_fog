@@ -87,7 +87,7 @@ public class MyService {
      * Creates random template only contains 2 digits : 0, 1
      * 
      * @param size : Size of random template
-     * @param quantityDigitOne : Quantity of digits 1 in random template
+     * @param quantityDigitsOne : Quantity of digits 1 in random template
      * @return The random template shuffled
      */
     public static int[] createRandomTemplate(int size, int quantityDigitsOne) {
@@ -239,10 +239,5 @@ public class MyService {
     	individual.setGene(geneIndex1, individual.getGene(geneIndex2));
     	individual.setGene(geneIndex2, temp);
     }
-    
-	
-	public static void main(String[] args) {
-		Arrays a;
-		
-	}
+
 }

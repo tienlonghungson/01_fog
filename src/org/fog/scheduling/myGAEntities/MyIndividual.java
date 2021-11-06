@@ -174,7 +174,4 @@ public class MyIndividual implements java.io.Serializable{
 	public void setMaxValue(int maxValue) {
 		this.maxValue = maxValue;
 	}
-	
-	
-
 }

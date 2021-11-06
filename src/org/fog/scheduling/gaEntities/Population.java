@@ -11,26 +11,21 @@ public class Population {
 
 	/**
 	 * Initializes blank population of individuals
-	 * 
-	 * @param populationSize
-	 *            The number of individuals in the population
 	 */
 	public Population() {
 		// Initial population
-		this.population = new ArrayList<Individual>();
+		this.population = new ArrayList<>();
 	}
 
 	/**
 	 * Initializes population of individuals
 	 * 
-	 * @param populationSize
-	 *            The number of individuals in the population
-	 * @param chromosomeLength
-	 *            The size of each individual's chromosome
+	 * @param populationSize The number of individuals in the population
+	 * @param chromosomeLength The size of each individual's chromosome
 	 */
 	public Population(int populationSize, int chromosomeLength, int maxValue) {
 		// Initialize the population as an array of individuals
-		this.population = new ArrayList<Individual>();
+		this.population = new ArrayList<>();
 
 		// Create each individual in turn
 		for (int individualCount = 0; individualCount < populationSize; individualCount++) {
@@ -54,7 +49,7 @@ public class Population {
 	/**
 	 * Get individuals from the population
 	 * 
-	 * @return individuals Individuals in population
+	 * @return individuals in population
 	 */
 	public List<Individual> getPopulation(){
 		return this.population;
@@ -65,7 +60,7 @@ public class Population {
 	}
 	
 	/**
-	 * Find an individual in the population by its fitness
+	 * Find an individual in the sorted rank population by its ranked fitness
 	 * 
 	 * This method lets you select an individual in order of its fitness. This
 	 * can be used to find the single strongest individual (eg, if you're
@@ -73,10 +68,9 @@ public class Population {
 	 * (if you're looking to cull the population) or some of the strongest
 	 * individuals (if you're using "elitism").
 	 * 
-	 * @param offset
-	 *            The offset of the individual you want, sorted by fitness. 0 is
-	 *            the strongest, population.length - 1 is the weakest.
-	 * @return individual Individual at offset
+	 * @param offset The offset of the individual you want, sorted by fitness. 0 is
+	 *                  the strongest, population. length - 1 is the weakest.
+	 * @return individual at offset
 	 */
 	public Individual getFittest(int offset) {
 //		sortPopulation();
@@ -87,24 +81,20 @@ public class Population {
 
 	public void sortPopulation() {
 		// Order population by fitness
-		Collections.sort(this.population, new Comparator<Individual>() {
-			@Override
-			public int compare(Individual o1, Individual o2) {
-				if (o1.getFitness() > o2.getFitness()) {
-					return -1;
-				} else if (o1.getFitness() < o2.getFitness()) {
-					return 1;
-				}
-				return 0;
+		this.population.sort((o1, o2) -> {
+			if (o1.getFitness() > o2.getFitness()) {
+				return -1;
+			} else if (o1.getFitness() < o2.getFitness()) {
+				return 1;
 			}
+			return 0;
 		});
 	}
 
 	/**
 	 * Set population's group fitness
 	 * 
-	 * @param fitness
-	 *            The population's total fitness
+	 * @param fitness The population's total fitness
 	 */
 	public void setPopulationFitness(double fitness) {
 		this.populationFitness = fitness;
@@ -122,9 +112,9 @@ public class Population {
 	/**
 	 * Set individual at offset
 	 * 
-	 * @param individual
-	 * @param offset
-	 * @return individual
+	 * @param individual new individual
+	 * @param offset offset value
+	 * @return old individual at the offset position
 	 */
 	public Individual setIndividual(int offset, Individual individual) {
 		return population.set(offset, individual);
@@ -133,8 +123,8 @@ public class Population {
 	/**
 	 * Get individual at offset
 	 * 
-	 * @param offset
-	 * @return individual
+	 * @param offset offset value
+	 * @return individual at offset
 	 */
 	public Individual getIndividual(int offset) {
 		return population.get(offset);
