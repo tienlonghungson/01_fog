@@ -2,14 +2,14 @@ package org.fog.scheduling.gaEntities;
 
 public class Individual {
 	
-	private int[] chromosome;
+	protected int[] chromosome;
 	private double cost;
 	private double time;
 	private double fitness = -1;
 	private int maxValue;
 	
 	public Individual(int chromosomeLength, int maxValue) {
-		this.chromosome = new int[chromosomeLength];
+		this(chromosomeLength);
 		this.maxValue = maxValue;
 		for (int gene = 0; gene < chromosomeLength; gene++) {
 			this.setGene(gene, Service.rand(0, maxValue));
@@ -17,8 +17,7 @@ public class Individual {
 	}
 	
 	public Individual(int chromosomeLength, int maxValue, int value) {
-		this.chromosome = new int[chromosomeLength];
-		this.maxValue = maxValue;
+		this(chromosomeLength, maxValue);
 		for (int gene = 0; gene < chromosomeLength; gene++) {
 			this.setGene(gene, value);
 		}

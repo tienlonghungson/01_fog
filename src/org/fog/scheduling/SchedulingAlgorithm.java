@@ -1,6 +1,5 @@
 package org.fog.scheduling;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -9,9 +8,9 @@ import org.fog.scheduling.bee.BeeAlgorithm;
 import org.fog.scheduling.gaEntities.GeneticAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
 import org.fog.scheduling.gaEntities.Population;
-import org.fog.scheduling.gaEntities.Service;
 import org.fog.scheduling.localSearchAlgorithm.LocalSearchAlgorithm;
-import org.fog.scheduling.localSearchAlgorithm.Pair;
+import org.fog.scheduling.nsgaii.NSGAIIAlgorithms;
+import org.fog.scheduling.nsgaii.NSGAIIPopulation;
 
 public class SchedulingAlgorithm {
 
@@ -20,13 +19,14 @@ public class SchedulingAlgorithm {
     public static final String LOCAL_SEARCH = "local search";
     public static final String TABU_SEARCH = "tabu search";
     public static final String BEE = "Bee Algorithm";
+    public static final String NSGAII = "NSGAII";
 
     // the weight value defines the trade-off between time and cost
     public static final double TIME_WEIGHT = 0.5;
 
     //GA and BEE  parameters
-    public static final int NUMBER_INDIVIDUAL = 400;
-    public static final int NUMBER_ITERATION = 1000;
+    public static final int NUMBER_INDIVIDUAL = 400;// 400
+    public static final int NUMBER_ITERATION = 1000;// 1000
 
     public static final double MUTATION_RATE = 0.1;
     public static final double CROSSOVER_RATE = 0.9;
@@ -37,6 +37,10 @@ public class SchedulingAlgorithm {
 
     //Tabu Search parameters
     public static final int TABU_CONSTANT = 10;
+
+    // NSGAII Parameters
+    public static final float NS_MUTATION_RATE = 0.1f;
+    public static final int K_WAY = 4;
 
     // GA run
     public static Individual runGeneticAlgorithm(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
@@ -163,7 +167,7 @@ public class SchedulingAlgorithm {
         //initiate an individual
         Individual individual = new Individual(cloudletList.size(), fogDevices.size() - 1);
         individual.printGene();
-        individual = localSearch.hillCliming(individual, fogDevices, cloudletList);
+        individual = localSearch.hillClimbing(individual, fogDevices, cloudletList);
 
         return individual;
     }
@@ -235,6 +239,82 @@ public class SchedulingAlgorithm {
         population.getFittest(0).printGene();
         System.out.println("\nBest solution: " + population.getFittest(0).getFitness() );
         population.printPopulation();
+        return population.getFittest(0);
+    }
+
+    public static Individual runNSGAIIAlgorithm(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
+        // Create NSGAII Object
+        NSGAIIAlgorithms nsgaiiAlgorithms = new NSGAIIAlgorithms(NUMBER_INDIVIDUAL, NS_MUTATION_RATE, CROSSOVER_RATE, NUMBER_ELITISM_INDIVIDUAL,K_WAY);
+
+
+        // Calculate the boundary of time and cost
+        nsgaiiAlgorithms.calcMinTimeCost(fogDevices, cloudletList);
+
+        // Initialize population
+        NSGAIIPopulation population = nsgaiiAlgorithms.initPopulation(cloudletList.size(), fogDevices.size() - 1);
+
+        // Evaluate population
+        nsgaiiAlgorithms.evalPopulation(population, fogDevices, cloudletList);
+
+        population.printPopulation();
+        // Keep track of current generation
+        int generation = 0;
+
+//        System.out.println("Start Iterating");
+
+        /*
+         * Start the evolution loop
+         *
+         * Every genetic algorithm problem has different criteria for finishing.
+         * In this case, we know what a perfect solution looks like (we don't
+         * always!), so our isTerminationConditionMet method is very
+         * straightforward: if there's a member of the population whose
+         * chromosome is all ones, we're done!
+         */
+        while (generation < NUMBER_ITERATION) {
+            System.out.println("\n------------- Generation " + generation + " --------------");
+//                                    population.printPopulation();
+            // select by non-dominated sorting and crowding distance
+//            System.out.println("In Iteration, start selecting");
+//            System.out.println("After selection");
+            nsgaiiAlgorithms.selectPopulation(population);
+//            System.out.println(population);
+            // Apply crossover & mutation
+//            System.out.println("In Iteration, start crossover");
+            nsgaiiAlgorithms.crossOverPopulation(population);
+//            System.out.println("After crossover");
+//            System.out.println(population);
+            // Evaluate population
+//            System.out.println("In iteration, start evaluating");
+            nsgaiiAlgorithms.evalPopulation(population, fogDevices, cloudletList);
+//            System.out.println("After evaluation");
+//            System.out.println(population);
+
+//            population.saveBest();
+            population.addBestToPopulation();
+//            System.out.println("After add Best");
+//            System.out.println(population);
+            population.getFittest(0).printGene();
+
+            // Print fittest individual from population
+            System.out.println("\nBest solution of generation " + generation + ": " + population.getFittest(0).getFitness());
+            System.out.println("Makespan: (" + nsgaiiAlgorithms.getMinTime() + ")--" + population.getFittest(0).getTime());
+            System.out.println("TotalCost: (" + nsgaiiAlgorithms.getMinCost() + ")--" + population.getFittest(0).getCost());
+            // Increment the current generation
+            generation++;
+//                                      population.printPopulation();
+        }
+
+        /*
+         * We're out of the loop now, which means we have a perfect solution on
+         * our hands. Let's print it out to confirm that it is actually all
+         * ones, as promised.
+         */
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>RESULTS<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println("Found solution in " + generation + " generations");
+        population.getBestGlobal().printGene();
+        System.out.println("\nBest solution: " + population.getBestGlobal().getFitness() );
         return population.getFittest(0);
     }
 }
