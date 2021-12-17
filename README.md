@@ -1,13 +1,14 @@
 # fogsim - task scheduling
 A Toolkit for Modeling and Simulation of Resource Management Techniques in Internet of Things, Edge and Fog Computing Environments
 
-## IMPORTANT
-Please check the `improv` branch for latest changes. Master branch has been left intact until complete testing.
+## what's new in my fork
+In this fork, I implement some multi-objective optimization algorithms, including:
+- NSGA II 
+- MOEA/D
 
 ## How to run iFogSim ?
 
-* Clone project về workspace trên máy mình
+* Clone project
 ```
 git clone https://github.com/TonnyTran/01_fog.git
 ```
-* Trong eclipse, chọn File/new/java project --> tạo project tên  là 01_fog
