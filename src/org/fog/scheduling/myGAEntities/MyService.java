@@ -54,14 +54,11 @@ public class MyService {
             ObjectInputStream in = 
                 new ObjectInputStream(fbos.getInputStream());
             obj = in.readObject();
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-        catch(ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
-        }
-        return obj;
+        }catch(ClassNotFoundException | IOException cnfe) {
+			cnfe.printStackTrace();
+		}
+
+		return obj;
     }
     
     
@@ -107,7 +104,7 @@ public class MyService {
     
 	/**
 	 * Calculates the lower boundary of cost (the possible minimum cost)
-	 * 
+	 *
 	 * @param fogDevices
 	 * @param cloudletList
 	 * @return Lower boundary of cost
@@ -124,17 +121,17 @@ public class MyService {
 			}
 			// the minCost is defined as the sum of all minCloudletCost
 			minCost += minCloudletCost;
-		}		
+		}
 		return minCost;
 	}
 
 
 	/**
 	 * Calculates the cost when executing a specified task (cloud-let) on a specified fog device
-	 * 
+	 *
 	 * @param cloudlet
 	 * @param fogDevice
-	 * @return 
+	 * @return
 	 */
     public static double calcCost(Cloudlet cloudlet, FogDevice fogDevice) {
 		double cost = 0;
@@ -150,7 +147,7 @@ public class MyService {
 
 	/**
 	 * Calculates the lower boundary of time (the possible minimum make-span)
-	 * 
+	 *
 	 * @param fogDevices
 	 * @param cloudletList
 	 * @return
@@ -176,12 +173,12 @@ public class MyService {
 
 		return minTime;
 	}
-    
-    
-    
+
+
+
 	/**
 	 * Calculates fitness of an specified individual.
-	 * 
+	 *
 	 * @param individual : The individual to evaluate
 	 * @param minTime : The lower boundary of time
 	 * @param minCost : The lower boundary of cost
@@ -197,7 +194,7 @@ public class MyService {
 		// Set again the task list for each fogDevice from the specified individual's chromosome
 		for (int geneIndex = 0; geneIndex < individual.getChromosomeLength(); geneIndex++) {
 			fogDevices.get(individual.getGene(geneIndex)) // Gets fog device
-			.getCloudletListAssignment().add(cloudletList.get(geneIndex)); // Assigns task to the fog device's task list 
+			.getCloudletListAssignment().add(cloudletList.get(geneIndex)); // Assigns task to the fog device's task list
 		}
 
 		//Calculates the make-span and cost
@@ -221,19 +218,19 @@ public class MyService {
 
 		//Store makespan
 		individual.setTime(makespan);
-		
+
 		//Store cost
 		individual.setCost(totalCost);
 
 		// Calculate fitness
-		double fitness = MySchedulingAlgorithm.TIME_WEIGHT * minTime / makespan 
+		double fitness = MySchedulingAlgorithm.TIME_WEIGHT * minTime / makespan
 				+ (1 - MySchedulingAlgorithm.TIME_WEIGHT) * minCost / totalCost;
 
 		// Store fitness
 		individual.setFitness(fitness);
 		return fitness;
 	}
-    
+
     public static void swapIndividual(MyIndividual individual, int geneIndex1, int geneIndex2) {
     	int temp = individual.getGene(geneIndex1);
     	individual.setGene(geneIndex1, individual.getGene(geneIndex2));

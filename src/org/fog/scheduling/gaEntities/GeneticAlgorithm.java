@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.fog.entities.FogDevice;
+import org.fog.scheduling.AbstractAlgorithm;
 import org.fog.scheduling.SchedulingAlgorithm;
 
 /**
@@ -30,7 +31,7 @@ import org.fog.scheduling.SchedulingAlgorithm;
  *
  * @author bkanber
  */
-public class GeneticAlgorithm {
+public class GeneticAlgorithm extends AbstractAlgorithm {
     protected final int POPULATION_SIZE;
     /**
      * Mutation rate is the fractional probability than an individual gene will
@@ -54,66 +55,12 @@ public class GeneticAlgorithm {
      */
     protected final int ELITISM_COUNT;
 
-    private double minTime;
-    private double minCost;
-
 
     public GeneticAlgorithm(int populationSize, double mutationRate, double crossoverRate, int elitismCount) {
         this.POPULATION_SIZE = populationSize;
         this.MUTATION_RATE = mutationRate;
         this.CROSSOVER_RATE = crossoverRate;
         this.ELITISM_COUNT = elitismCount;
-    }
-
-    /**
-     * calculate the lower boundary of time and cost
-     */
-    public void calcMinTimeCost(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
-        this.minTime = calcMinTime(fogDevices, cloudletList);
-        this.minCost = calcMinCost(fogDevices, cloudletList);
-    }
-
-    private double calcMinCost(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
-        double minCost = 0;
-        for (Cloudlet cloudlet : cloudletList) {
-            double minCloudletCost = Double.MAX_VALUE;
-            for (FogDevice fogDevice : fogDevices) {
-                double cost = calcCost(cloudlet, fogDevice);
-                if (minCloudletCost > cost) {
-                    minCloudletCost = cost;
-                }
-            }
-            // the minCost is defined as the sum of all minCloudletCost
-            minCost += minCloudletCost;
-        }
-        return minCost;
-    }
-
-    // the method calculates the cost (G$) when a fogDevice executes a cloudlet
-    private double calcCost(Cloudlet cloudlet, FogDevice fogDevice) {
-        double cost = 0;
-        //cost includes the processing cost
-        cost += fogDevice.getCharacteristics().getCostPerSecond() * cloudlet.getCloudletLength() / fogDevice.getHost().getTotalMips();
-        // cost includes the memory cost
-        cost += fogDevice.getCharacteristics().getCostPerMem() * cloudlet.getMemRequired();
-        // cost includes the bandwidth cost
-        cost += fogDevice.getCharacteristics().getCostPerBw() * (cloudlet.getCloudletFileSize() + cloudlet.getCloudletOutputSize());
-        return cost;
-    }
-
-    // the function calculate the lower bound of the solution about time execution
-    private double calcMinTime(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
-        double minTime = 0;
-        double totalLength = 0;
-        double totalMips = 0;
-        for (Cloudlet cloudlet : cloudletList) {
-            totalLength += cloudlet.getCloudletLength();
-        }
-        for (FogDevice fogDevice : fogDevices) {
-            totalMips += fogDevice.getHost().getTotalMips();
-        }
-        minTime = totalLength / totalMips;
-        return minTime;
     }
 
     /**
@@ -126,64 +73,6 @@ public class GeneticAlgorithm {
         // Initialize population
         Population population = new Population(this.POPULATION_SIZE, chromosomeLength, maxValue);
         return population;
-    }
-
-    /**
-     * Calculate fitness for an individual.
-     * <p>
-     * In this case, the fitness score is very simple: it's the number of ones
-     * in the chromosome. Don't forget that this method, and this whole
-     * GeneticAlgorithm class, is meant to solve the problem in the "AllOnesGA"
-     * class and example. For different problems, you'll need to create a
-     * different version of this method to appropriately calculate the fitness
-     * of an individual.
-     *
-     * @param individual the individual to evaluate
-     * @return double The fitness value for individual
-     */
-    public double calcFitness(Individual individual, List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
-        // clear the fogDevice - task list before calculate
-        for (FogDevice fogDevice : fogDevices) {
-            fogDevice.getCloudletListAssignment().clear();
-        }
-
-        // Loop over individual's genes to all the task assigned to the fogDevice
-        for (int geneIndex = 0; geneIndex < individual.getChromosomeLength(); geneIndex++) {
-            //add current cloudlet to fog device respectively
-            fogDevices.get(individual.getGene(geneIndex)).getCloudletListAssignment().add(cloudletList.get(geneIndex));
-        }
-
-        //Calculate makespan and cost
-        double makespan = 0;
-        double execTime = 0;
-        double totalCost = 0;
-        for (FogDevice fogDevice : fogDevices) {
-            double totalLength = 0;
-            for (Cloudlet cloudlet : fogDevice.getCloudletListAssignment()) {
-                totalLength += cloudlet.getCloudletLength();
-                // the total cost is sum of the cost execution of each cloudlet
-                totalCost += calcCost(cloudlet, fogDevice);
-            }
-            // execTime is the time that fogDevice finishes its list cloudlet assignment
-            execTime = totalLength / fogDevice.getHostList().get(0).getTotalMips();
-            // makespan is defined as when the last cloudlet finished or when all fogDevices finish its work.
-            if (execTime > makespan) {
-                makespan = execTime;
-            }
-        }
-
-        //store makespan
-        individual.setTime(makespan);
-        //store cost
-        individual.setCost(totalCost);
-
-        // Calculate fitness
-        double fitness = SchedulingAlgorithm.TIME_WEIGHT * minTime / makespan
-                + (1 - SchedulingAlgorithm.TIME_WEIGHT) * minCost / totalCost;
-
-        // Store fitness
-        individual.setFitness(fitness);
-        return fitness;
     }
 
     /**
@@ -202,7 +91,7 @@ public class GeneticAlgorithm {
 
         // Loop over population evaluating individuals and summing population fitness
         for (Individual individual : population.getPopulation()) {
-            populationFitness += calcFitness(individual, fogDevices, cloudletList);
+            populationFitness += calcFitness(individual, fogDevices, cloudletList,SchedulingAlgorithm.TIME_WEIGHT);
         }
 
         //sort population with increasing fitness value
@@ -295,7 +184,7 @@ public class GeneticAlgorithm {
                 Individual parent2 = selectIndividual(population);
                 offspring = crossover2Point(parent1, parent2);
 
-                if (parent1.getFitness() <= calcFitness(offspring, fogDevices, cloudletList)
+                if (parent1.getFitness() <= calcFitness(offspring, fogDevices, cloudletList,SchedulingAlgorithm.TIME_WEIGHT)
                         && !doesPopupationIncludeIndividual(population, offspring)) {
                     newPopulation.add(offspring);
                 } else {
@@ -308,8 +197,6 @@ public class GeneticAlgorithm {
         population.getPopulation().clear();
         population.setPopulation(newPopulation);
 
-//              System.out.println("--------AFTER CROSSOVER--------");
-//              population.printPopulation();
         return population;
     }
 
@@ -409,35 +296,6 @@ public class GeneticAlgorithm {
                 Individual individual = population.getFittest(populationIndex);
                 individual.setGene(Service.rand(0, individual.getChromosomeLength() - 1), Service.rand(0, individual.getMaxValue()));
 
-
-//                              Individual newIndividual = new Individual(individual.getChromosomeLength());
-//
-//                              //listChange contains which gen change makes the individual better
-//                              List<Pair> listChange = new ArrayList<Pair>();
-//
-//
-//                              for(int cloudletId = 0; cloudletId < individual.getChromosomeLength(); cloudletId++) {
-//                                      for(int fogId = 0; fogId < individual.getMaxValue() + 1; fogId++) {
-//
-//                                              for(int geneIndex = 0; geneIndex < newIndividual.getChromosomeLength(); geneIndex++) {
-//                                                      newIndividual.setGene(geneIndex, individual.getGene(geneIndex));
-//                                              }
-//
-//                                              // change a gene of individual to form newIndividual
-//                                              newIndividual.setGene(cloudletId, fogId);
-//                                              double newFitness = calcFitness(newIndividual, fogDevices, cloudletList);
-//                                              //if newIndividual is better then individual, store change in listChange
-//                                              if(newFitness > individual.getFitness()) {
-//                                                      listChange.add(new Pair(cloudletId, fogId));
-//                                              }
-//                                      }
-//                              }
-//
-//                              // if exist any gene make individual better, select randomly a gene change to have newIndividual
-//                              if(!listChange.isEmpty()) {
-//                                      int change = Service.rand(0, listChange.size() - 1);
-//                                      individual.setGene(listChange.get(change).getCloudletId(), listChange.get(change).getFogId());
-//                              }
             }
         }
         // Return mutated population
@@ -454,39 +312,17 @@ public class GeneticAlgorithm {
                         similar = false;
                     }
                 }
-                if (similar == true) {
+                if (similar) {
                     include = true;
                     break;
                 }
             }
-            if (include == true) break;
+            if (include) break;
         }
         return include;
     }
 
     public void selectPopulation(Population population) {
-        // remove similar individuals
-//              population.sortPopulation();
-////            System.out.println("--------before select--------");
-////            population.printPopulation();
-//              for(int populationIndex = 0; populationIndex < population.size()-1; populationIndex++) {
-//                      for(int index = populationIndex +1; index < population.size(); index++) {
-//                              if(population.getIndividual(populationIndex).getFitness() == population.getIndividual(index).getFitness()) {
-//                                      boolean similar = true;
-//                                      for(int geneIndex = 0; geneIndex < population.getIndividual(populationIndex).getChromosomeLength(); geneIndex++) {
-//                                              if(population.getIndividual(populationIndex).getGene(geneIndex) != population.getIndividual(index).getGene(geneIndex)) {
-//                                                      similar = false;
-//                                              }
-//                                      }
-//                                      if(similar == true) {
-//                                              population.getPopulation().remove(populationIndex);
-//                                              populationIndex--;
-//                                              break;
-//                                      }
-//                              }
-//                      }
-//              }
-
         population.sortPopulation();
 
         System.out.println("Before Selection: ");
@@ -498,31 +334,6 @@ public class GeneticAlgorithm {
         System.out.println("After Selection: ");
         population.printPopulation();
 
-//              System.out.println("--------AFTER select--------");
-//              population.printPopulation();
-
-
-//              // Create new population
-//              List<Individual> newPopulation = new ArrayList<Individual>();
-//              for(int populationIndex = 0; populationIndex < SchedulingAlgorithm.NUMBER_INDIVIDUAL; populationIndex++) {
-////                    if(populationIndex < SchedulingAlgorithm.NUMBER_ELITISM_INDIVIDUAL) {
-////                            newPopulation.add(population.getIndividual(populationIndex));
-////                    } else {
-////                            Individual individual = selectIndividual(population);
-////                            newPopulation.add(individual);
-////                    }
-//                      newPopulation.add(population.getFittest(populationIndex));
-//              }
-//              population.getPopulation().clear();
-//              population.setPopulation(newPopulation);
-    }
-
-    public double getMinTime() {
-        return this.minTime;
-    }
-
-    public double getMinCost() {
-        return this.minCost;
     }
 
     public boolean isSameIndividual(Individual individual1, Individual individual2) {
@@ -569,15 +380,6 @@ public class GeneticAlgorithm {
 
             List<Individual> listOffsprings = crossover2Point2(parent1, parent2);
 
-//                      parent1.printGene();
-//                      System.out.println("");
-//                      parent2.printGene();
-//                      System.out.println("");
-//                      listOffsprings.get(0).printGene();
-//                      System.out.println("");
-//                      listOffsprings.get(1).printGene();
-//                      System.out.println("");
-
             newPopulation.getPopulation().add(listOffsprings.get(0));
             newPopulation.getPopulation().add(listOffsprings.get(1));
         }
@@ -614,8 +416,6 @@ public class GeneticAlgorithm {
         while (population.size() > SchedulingAlgorithm.NUMBER_INDIVIDUAL) {
             population.getPopulation().remove(SchedulingAlgorithm.NUMBER_INDIVIDUAL);
         }
-//              System.out.println("After Selection: ");
-//              population.printPopulation();
         return population;
     }
 
