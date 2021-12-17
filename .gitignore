@@ -2,3 +2,6 @@ bin/
 .classpath
 .settings/
 .project
+out/
+.idea/
+01_fog.iml
