@@ -7,6 +7,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.fog.entities.FogDevice;
 import org.fog.scheduling.AbstractAlgorithm;
 import org.fog.scheduling.SchedulingAlgorithm;
+import org.fog.utils.Service;
 
 /**
  * The GeneticAlgorithm class is our main abstraction for managing the

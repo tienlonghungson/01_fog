@@ -9,7 +9,7 @@ import org.fog.scheduling.AbstractAlgorithm;
 import org.fog.scheduling.SchedulingAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
 import org.fog.scheduling.gaEntities.Population;
-import org.fog.scheduling.gaEntities.Service;
+import org.fog.utils.Service;
 
 public class BeeAlgorithm extends AbstractAlgorithm {
 

@@ -1,5 +1,5 @@
 package org.fog.scheduling.myGAEntities;
-import org.fog.scheduling.gaEntities.Service;
+import org.fog.utils.Service;
 
 
 

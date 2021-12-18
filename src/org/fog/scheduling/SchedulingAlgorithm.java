@@ -9,8 +9,10 @@ import org.fog.scheduling.gaEntities.GeneticAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
 import org.fog.scheduling.gaEntities.Population;
 import org.fog.scheduling.localSearchAlgorithm.LocalSearchAlgorithm;
+import org.fog.scheduling.moead.MOEAD;
 import org.fog.scheduling.nsgaii.NSGAIIAlgorithms;
 import org.fog.scheduling.nsgaii.NSGAIIPopulation;
+import org.fog.utils.Pair;
 
 public class SchedulingAlgorithm {
 
@@ -20,6 +22,7 @@ public class SchedulingAlgorithm {
     public static final String TABU_SEARCH = "tabu search";
     public static final String BEE = "Bee Algorithm";
     public static final String NSGAII = "NSGAII";
+    public static final String MOEAD = "MOEAD";
 
     // the weight value defines the trade-off between time and cost
     public static final double TIME_WEIGHT = 0.5;
@@ -41,6 +44,10 @@ public class SchedulingAlgorithm {
     // NSGAII Parameters
     public static final float NS_MUTATION_RATE = 0.1f;
     public static final int K_WAY = 4;
+
+    // MOEAD Parameters
+    public static final int NUM_SUB_PROBLEMS=20;
+    public static final int NUM_NEIGHBORS =7;
 
     // GA run
     public static Individual runGeneticAlgorithm(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
@@ -317,4 +324,64 @@ public class SchedulingAlgorithm {
         System.out.println("\nBest solution: " + population.getBestGlobal().getFitness() );
         return population.getFittest(0);
     }
+
+    public static Individual runMOEAD(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
+        // Create MOEAD
+//        NSGAIIAlgorithms nsgaiiAlgorithms = new NSGAIIAlgorithms(NUMBER_INDIVIDUAL, NS_MUTATION_RATE, CROSSOVER_RATE, NUMBER_ELITISM_INDIVIDUAL,K_WAY);
+        MOEAD moead = new MOEAD(NUM_SUB_PROBLEMS,NUM_NEIGHBORS,cloudletList.size(), fogDevices.size() - 1);
+
+        // Calculate the boundary of time and cost
+//        nsgaiiAlgorithms.calcMinTimeCost(fogDevices, cloudletList);
+        moead.calcMinTimeCost(fogDevices,cloudletList);
+
+        // Initialize population
+//        NSGAIIPopulation population = nsgaiiAlgorithms.initPopulation(cloudletList.size(), fogDevices.size() - 1);
+
+        // Evaluate population
+//        nsgaiiAlgorithms.evalPopulation(population, fogDevices, cloudletList);
+        moead.evalPopulation(fogDevices, cloudletList);
+
+//        population.printPopulation();
+        // Keep track of current generation
+        int generation = 0;
+
+//        System.out.println("Start Iterating");
+
+        /*
+         * Start the evolution loop
+         *
+         * Every genetic algorithm problem has different criteria for finishing.
+         * In this case, we know what a perfect solution looks like (we don't
+         * always!), so our isTerminationConditionMet method is very
+         * straightforward: if there's a member of the population whose
+         * chromosome is all ones, we're done!
+         */
+        while (generation < NUMBER_ITERATION) {
+            System.out.println("\n------------- Generation " + generation + " --------------");
+//            System.out.println("\nBest solution of generation " + generation + ": " + population.getFittest(0).getFitness());
+//            System.out.println("Makespan: (" + moead.getMinTime() + ")--" + population.getFittest(0).getTime());
+//            System.out.println("TotalCost: (" + moead.getMinCost() + ")--" + population.getFittest(0).getCost());
+            // Increment the current generation
+            moead.update(fogDevices,cloudletList);
+            generation++;
+//                                      population.printPopulation();
+        }
+
+        /*
+         * We're out of the loop now, which means we have a perfect solution on
+         * our hands. Let's print it out to confirm that it is actually all
+         * ones, as promised.
+         */
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>RESULTS<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println("Found solution in " + generation + " generations");
+        Pair<Double,Individual> best = moead.getBestFitness(SchedulingAlgorithm.TIME_WEIGHT);
+        System.out.println("BestFitness is "+moead.calcFitness(best.second(),fogDevices,cloudletList,SchedulingAlgorithm.TIME_WEIGHT));
+        System.out.println("Returned value is "+best.first());
+        best.second().printGene();
+        System.out.println("\nBest sub solution: " + best.second().getFitness());
+//        return moead.getBestFitness(SchedulingAlgorithm.TIME_WEIGHT);
+        return best.second();
+    }
+
 }

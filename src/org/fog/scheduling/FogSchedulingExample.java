@@ -43,8 +43,8 @@ public class FogSchedulingExample {
     private static final String COMMA_DELIMITER = ",";
 
     public static String fileName = "data_infrucstructure/fog15";
-    public static int number_cloudlet = 50;
-    public static String algorithm = SchedulingAlgorithm.NSGAII;
+    public static int number_cloudlet = 200;
+    public static String algorithm = SchedulingAlgorithm.GA;
     public static String filename_cloudlet = "data/data" + number_cloudlet;
     public static String filename_ouput = "results_ex/" + algorithm + "_" + number_cloudlet;
 
@@ -226,17 +226,15 @@ public class FogSchedulingExample {
 
             // How to read file in java line by line?
             while ((line = br.readLine()) != null) {
-                if (line != null) {
-                    String[] splitData = line.split(COMMA_DELIMITER);
-                    cloudletId = Integer.parseInt(splitData[0]);
-                    length = Long.parseLong(splitData[1]);
-                    fileSize = Long.parseLong(splitData[2]);
-                    outputSize = Long.parseLong(splitData[3]);
-                    memRequired = Long.parseLong(splitData[4]);
-                    Cloudlet cloudlet = new Cloudlet(cloudletId, length, pesNumber, fileSize, outputSize, memRequired, utilizationModel,
-                            utilizationModel, utilizationModel);
-                    list.add(cloudlet);
-                }
+                String[] splitData = line.split(COMMA_DELIMITER);
+                cloudletId = Integer.parseInt(splitData[0]);
+                length = Long.parseLong(splitData[1]);
+                fileSize = Long.parseLong(splitData[2]);
+                outputSize = Long.parseLong(splitData[3]);
+                memRequired = Long.parseLong(splitData[4]);
+                Cloudlet cloudlet = new Cloudlet(cloudletId, length, pesNumber, fileSize, outputSize, memRequired, utilizationModel,
+                        utilizationModel, utilizationModel);
+                list.add(cloudlet);
             }
         } catch (IOException e) {
             e.printStackTrace();

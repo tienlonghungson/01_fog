@@ -1,6 +1,8 @@
 package org.fog.scheduling.gaEntities;
 
-public class Individual {
+import org.fog.utils.Service;
+
+public class Individual implements Cloneable{
 	
 	protected int[] chromosome;
 	private double cost;
@@ -96,5 +98,16 @@ public class Individual {
 
 	public void setMaxValue(int maxValue) {
 		this.maxValue = maxValue;
+	}
+
+	@Override
+	public Object clone(){
+		try {
+			Individual cloned = (Individual) super.clone();
+			cloned.chromosome = this.chromosome.clone();
+			return cloned;
+		}catch (CloneNotSupportedException e){
+			throw new InternalError(e);
+		}
 	}
 }

@@ -9,7 +9,7 @@ import org.fog.entities.FogDevice;
 import org.fog.scheduling.AbstractAlgorithm;
 import org.fog.scheduling.SchedulingAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
-import org.fog.scheduling.gaEntities.Service;
+import org.fog.utils.Service;
 
 public class LocalSearchAlgorithm extends AbstractAlgorithm {
 
