@@ -28,8 +28,8 @@ public class SchedulingAlgorithm {
     public static final double TIME_WEIGHT = 0.5;
 
     //GA and BEE  parameters
-    public static final int NUMBER_INDIVIDUAL = 400;// 400
-    public static final int NUMBER_ITERATION = 1000;// 1000
+    public static final int NUMBER_INDIVIDUAL = 20;// 400
+    public static final int NUMBER_ITERATION = 20;// 1000
 
     public static final double MUTATION_RATE = 0.1;
     public static final double CROSSOVER_RATE = 0.9;
@@ -297,7 +297,7 @@ public class SchedulingAlgorithm {
 //            System.out.println("After evaluation");
 //            System.out.println(population);
 
-//            population.saveBest();
+            population.saveBest();
             population.addBestToPopulation();
 //            System.out.println("After add Best");
 //            System.out.println(population);
@@ -327,18 +327,13 @@ public class SchedulingAlgorithm {
 
     public static Individual runMOEAD(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList) {
         // Create MOEAD
-//        NSGAIIAlgorithms nsgaiiAlgorithms = new NSGAIIAlgorithms(NUMBER_INDIVIDUAL, NS_MUTATION_RATE, CROSSOVER_RATE, NUMBER_ELITISM_INDIVIDUAL,K_WAY);
         MOEAD moead = new MOEAD(NUM_SUB_PROBLEMS,NUM_NEIGHBORS,cloudletList.size(), fogDevices.size() - 1);
 
         // Calculate the boundary of time and cost
-//        nsgaiiAlgorithms.calcMinTimeCost(fogDevices, cloudletList);
         moead.calcMinTimeCost(fogDevices,cloudletList);
 
         // Initialize population
-//        NSGAIIPopulation population = nsgaiiAlgorithms.initPopulation(cloudletList.size(), fogDevices.size() - 1);
-
         // Evaluate population
-//        nsgaiiAlgorithms.evalPopulation(population, fogDevices, cloudletList);
         moead.evalPopulation(fogDevices, cloudletList);
 
 //        population.printPopulation();

@@ -114,12 +114,13 @@ public class Individual implements Cloneable{
 
 	@Override
 	public Object clone(){
+		Individual cloned;
 		try {
-			Individual cloned = (Individual) super.clone();
-			cloned.chromosome = this.chromosome.clone();
-			return cloned;
+			cloned = (Individual) super.clone();
 		}catch (CloneNotSupportedException e){
 			throw new InternalError(e);
 		}
+		cloned.chromosome = this.chromosome.clone();
+		return cloned;
 	}
 }
