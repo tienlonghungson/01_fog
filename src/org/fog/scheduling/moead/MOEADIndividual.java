@@ -4,7 +4,6 @@ import org.fog.scheduling.MOIndividual;
 import org.fog.scheduling.gaEntities.Individual;
 import org.fog.utils.Service;
 
-import java.util.Arrays;
 
 public class MOEADIndividual extends MOIndividual{
     /**
@@ -13,18 +12,18 @@ public class MOEADIndividual extends MOIndividual{
      * R2 : swapHalfMutation
      * R3 : onePointMutation
      */
-    private final float R1 = 0.03f, R2 = 0.06f, R3=0.1f;
-    public MOEADIndividual(int chromosomeLength, int maxValue) {
-        super(chromosomeLength,maxValue);
-//        this.setMaxValue(maxValue);
-    }
+    private final float R1 = 0.2f, R2 = 0.4f, R3=0.6f;
 
-    public MOEADIndividual(int chromosomeLength, int maxValue, int value) {
-        super(chromosomeLength, maxValue, value);
-    }
-
-    public MOEADIndividual(int chromosomeLength) {
+    public MOEADIndividual(int chromosomeLength,int maxValue){
         super(chromosomeLength);
+        setMaxValue(maxValue);
+    }
+    public MOEADIndividual(int chromosomeLength, int maxValue, int lambda) {
+        super(chromosomeLength);
+        this.setMaxValue(maxValue);
+        for (int i=0;i<chromosomeLength;++i){
+            chromosome[i]=Math.min(maxValue,Service.poissonRand(lambda));
+        }
     }
 
     public Individual onePointCrossOver(Individual other){
@@ -36,6 +35,24 @@ public class MOEADIndividual extends MOIndividual{
         }
         for (int i=POINT;i<LEN;++i){
             child.setGene(i, other.getGene(i));
+        }
+        return child;
+    }
+
+    public Individual twoPointCrossOver(Individual other){
+        final int LEN = getChromosomeLength();
+        final int POINT1 = Service.rand(0,(LEN-3))+1;
+        final int POINT2 = Service.rand(0,(LEN-POINT1-2))+POINT1+1;
+
+        Individual child = new MOEADIndividual(getChromosomeLength(),getMaxValue());
+        for (int i = 0; i < POINT1; i++) {
+            child.setGene(i,this.getGene(i));
+        }
+        for (int i = POINT1; i < POINT2; i++) {
+            child.setGene(i,other.getGene(i));
+        }
+        for (int i = POINT1; i < POINT2; i++) {
+            child.setGene(i, this.getGene(i));
         }
         return child;
     }

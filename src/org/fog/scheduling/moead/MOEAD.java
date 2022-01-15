@@ -35,9 +35,9 @@ public class MOEAD extends AbstractAlgorithm {
     private double[][] genWeightVector(){
         double[][] weightVector = new double[NUM_SUB_PROBLEM][2];
         Random rd = new Random();
-        final double FACTOR = rd.nextDouble();
+//        final double FACTOR = rd.nextDouble();
         for (int i=0;i<NUM_SUB_PROBLEM-1;++i){
-            weightVector[i][0]=((double) (i+1))*FACTOR/(double) NUM_SUB_PROBLEM;
+            weightVector[i][0]=((double) (i+1))/(double) NUM_SUB_PROBLEM;
             weightVector[i][1]=1-weightVector[i][0];
         }
         weightVector[NUM_SUB_PROBLEM-1][0]= SchedulingAlgorithm.TIME_WEIGHT;
@@ -80,9 +80,11 @@ public class MOEAD extends AbstractAlgorithm {
         SubProblem[] subProblems = new SubProblem[NUM_SUB_PROBLEM];
         double[][] weightedVector = genWeightVector();
         int[][] neighbors = getNeighbor(weightedVector);
+        int lambda;
         for (int i = 0; i < NUM_SUB_PROBLEM; i++) {
-            Individual individual = new MOEADIndividual(chromosomeLength,maxValue);
-            subProblems[i] = new SubProblem((float) weightedVector[i][0],(MOEADIndividual) individual,NUM_NEIGHBOR,neighbors[i]);
+            lambda = rd.nextInt(15)+1;
+            MOEADIndividual individual = new MOEADIndividual(chromosomeLength,maxValue,lambda);
+            subProblems[i] = new SubProblem((float) weightedVector[i][0], individual,NUM_NEIGHBOR,neighbors[i]);
         }
         return subProblems;
     }
@@ -105,7 +107,7 @@ public class MOEAD extends AbstractAlgorithm {
             idxSubPro2 = subProblems[i].getIdxNeighbor(oneToNArray.get(1));
 
             MOEADIndividual offspringInd = (MOEADIndividual) subProblems[idxSubPro1].getIndividual().
-                                            onePointCrossOver(subProblems[idxSubPro2].getIndividual());
+                                            twoPointCrossOver(subProblems[idxSubPro2].getIndividual());
             float mutationRate = rd.nextFloat();
             offspringInd.mutate(mutationRate);
 
@@ -139,6 +141,12 @@ public class MOEAD extends AbstractAlgorithm {
             }
 
         }
+
+//        System.out.println("Current EP");
+//        Iterator<Individual> iterator = externalPop.iterator();
+//        while (iterator.hasNext()){
+//            System.out.println(iterator.next());
+//        }
     }
 
     private double updateFitnessWithoutSaving(Individual individual, double timeWeight){

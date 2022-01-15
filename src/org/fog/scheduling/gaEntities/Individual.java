@@ -2,6 +2,8 @@ package org.fog.scheduling.gaEntities;
 
 import org.fog.utils.Service;
 
+import java.util.Arrays;
+
 public class Individual implements Cloneable{
 	
 	protected int[] chromosome;
@@ -98,6 +100,16 @@ public class Individual implements Cloneable{
 
 	public void setMaxValue(int maxValue) {
 		this.maxValue = maxValue;
+	}
+
+	@Override
+	public String toString() {
+		return "Individual{" +
+				"chromosome=" + Arrays.toString(chromosome) +
+				", cost=" + cost +
+				", time=" + time +
+				", fitness=" + fitness +
+				'}';
 	}
 
 	@Override
