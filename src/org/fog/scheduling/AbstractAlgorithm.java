@@ -3,6 +3,7 @@ package org.fog.scheduling;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.fog.entities.FogDevice;
 import org.fog.scheduling.gaEntities.Individual;
+import org.fog.utils.Service;
 
 import java.util.List;
 
@@ -64,14 +65,7 @@ public abstract class AbstractAlgorithm {
      * @return the cost when a fogDevice executes a cloudlet
      */
     protected double calcCost(Cloudlet cloudlet, FogDevice fogDevice) {
-        double cost = 0;
-        //cost includes the processing cost
-        cost += fogDevice.getCharacteristics().getCostPerSecond() * cloudlet.getCloudletLength() / fogDevice.getHost().getTotalMips();
-        // cost includes the memory cost
-        cost += fogDevice.getCharacteristics().getCostPerMem() * cloudlet.getMemRequired();
-        // cost includes the bandwidth cost
-        cost += fogDevice.getCharacteristics().getCostPerBw() * (cloudlet.getCloudletFileSize() + cloudlet.getCloudletOutputSize());
-        return cost;
+        return Service.calcCost(cloudlet,fogDevice);
     }
 
     /**

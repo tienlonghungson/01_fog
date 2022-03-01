@@ -5,6 +5,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.fog.entities.FogDevice;
 import org.fog.scheduling.bee.BeeAlgorithm;
+import org.fog.scheduling.bqtsearch.TabuSearch;
 import org.fog.scheduling.gaEntities.GeneticAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
 import org.fog.scheduling.gaEntities.Population;
@@ -23,13 +24,14 @@ public class SchedulingAlgorithm {
     public static final String BEE = "Bee Algorithm";
     public static final String NSGAII = "NSGAII";
     public static final String MOEAD = "MOEAD";
+    public static final String BQT = "BQT Search";
 
     // the weight value defines the trade-off between time and cost
     public static final double TIME_WEIGHT = 0.5;
 
     //GA and BEE  parameters
-    public static final int NUMBER_INDIVIDUAL = 20;// 400
-    public static final int NUMBER_ITERATION = 20;// 1000
+    public static final int NUMBER_INDIVIDUAL = 400;// 400
+    public static final int NUMBER_ITERATION = 600;// 1000
 
     public static final double MUTATION_RATE = 0.1;
     public static final double CROSSOVER_RATE = 0.9;
@@ -257,7 +259,7 @@ public class SchedulingAlgorithm {
         // Calculate the boundary of time and cost
         nsgaiiAlgorithms.calcMinTimeCost(fogDevices, cloudletList);
 
-        // Initialize population
+        // Initialize population cloudletList.size(), fogDevices.size() - 1
         NSGAIIPopulation population = nsgaiiAlgorithms.initPopulation(cloudletList.size(), fogDevices.size() - 1);
 
         // Evaluate population
@@ -297,14 +299,12 @@ public class SchedulingAlgorithm {
 //            System.out.println("After evaluation");
 //            System.out.println(population);
 
-            population.saveBest();
-            population.addBestToPopulation();
 //            System.out.println("After add Best");
 //            System.out.println(population);
-            population.getFittest(0).printGene();
-
+//            population.getFittest(0).printGene();
+            population.getBestFitness().printGene();
             // Print fittest individual from population
-            System.out.println("\nBest solution of generation " + generation + ": " + population.getFittest(0).getFitness());
+            System.out.println("\nBest solution of generation " + generation + ": " + population.getBestFitness().getFitness());
             System.out.println("Makespan: (" + nsgaiiAlgorithms.getMinTime() + ")--" + population.getFittest(0).getTime());
             System.out.println("TotalCost: (" + nsgaiiAlgorithms.getMinCost() + ")--" + population.getFittest(0).getCost());
             // Increment the current generation
@@ -320,8 +320,10 @@ public class SchedulingAlgorithm {
 
         System.out.println(">>>>>>>>>>>>>>>>>>>RESULTS<<<<<<<<<<<<<<<<<<<<<");
         System.out.println("Found solution in " + generation + " generations");
-        population.getBestGlobal().printGene();
-        System.out.println("\nBest solution: " + population.getBestGlobal().getFitness() );
+//        population.getBestGlobal().printGene();
+//        System.out.println("\nBest solution: " + population.getBestGlobal().getFitness() );
+        population.getBestFitness().printGene();
+        System.out.println("\nBest solution: " + population.getBestFitness().getFitness() );
         return population.getFittest(0);
     }
 
@@ -379,4 +381,12 @@ public class SchedulingAlgorithm {
         return best.second();
     }
 
+    public static Individual runBQTabuSearch(List<FogDevice> fogDevices, List<? extends Cloudlet> cloudletList){
+        // Create MOEAD
+        TabuSearch tabuSearch = new TabuSearch(cloudletList.size(), fogDevices.size());
+
+        // Calculate the boundary of time and cost
+        tabuSearch.calcMinTimeCost(fogDevices,cloudletList);
+        return tabuSearch.search(fogDevices, cloudletList);
+    }
 }

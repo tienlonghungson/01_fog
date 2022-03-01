@@ -2,6 +2,7 @@ package org.fog.scheduling.nsgaii;
 
 import org.fog.scheduling.gaEntities.GeneticAlgorithm;
 import org.fog.scheduling.gaEntities.Individual;
+import org.fog.utils.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +51,8 @@ public class NSGAIIAlgorithms extends GeneticAlgorithm {
 //            twoPointCrossover(parent1,parent2,children1,children2);
             children1 = new NSGAIIIndividual(parent1.getChromosomeLength());
             children2 = new NSGAIIIndividual(parent1.getChromosomeLength());
-            onePointCrossover(parent1, parent2, children1, children2);
+//            onePointCrossover(parent1, parent2, children1, children2);
+            binaryCrossOver(parent1, parent2, children1, children2);
             children1.setMaxValue(parent1.getMaxValue());
             children2.setMaxValue(parent2.getMaxValue());
 
@@ -62,7 +64,7 @@ public class NSGAIIAlgorithms extends GeneticAlgorithm {
             } else if (mutateDecision < R2) {
                 children2.setGene(rd.nextInt(children2.getChromosomeLength()), rd.nextInt(children2.getMaxValue()));
                 children1.swapHalfMutation();
-            } else {
+            } else if (mutateDecision < R3) {
                 children1.reversedMutation();
                 children2.swapHalfMutation();
             }
@@ -127,5 +129,27 @@ public class NSGAIIAlgorithms extends GeneticAlgorithm {
         }
     }
 
+    private void binaryCrossOver(Individual parent1, Individual parent2, Individual children1, Individual children2) {
+        int chromosomeLength = parent1.getChromosomeLength();
+
+        double binaryParameter;
+        int gene1, gene2;
+        for (int i = 0; i < chromosomeLength; i++) {
+            binaryParameter = Service.binaryParameter(2);
+            gene1 = (int) Math.max(0,
+                    Math.min(parent1.getMaxValue(),
+                            0.5 * ((1 - binaryParameter) * parent1.getGene(i) + (1 + binaryParameter) * parent2.getGene(i)
+                            )
+                    )
+            );
+            gene2 = (int) Math.max(0,
+                    Math.min(parent1.getMaxValue(),
+                            0.5 * ((1 + binaryParameter) * parent1.getGene(i) + (1 - binaryParameter) * parent2.getGene(i))
+                    )
+            );
+            children1.setGene(i, gene1);
+            children2.setGene(i, gene2);
+        }
+    }
 
 }

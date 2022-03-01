@@ -10,7 +10,7 @@ import java.util.Random;
 public class NSGAIIPopulation extends Population {
     private final int POPULATION_SIZE;
     private List<List<Individual>> fronts;
-    private final Individual bestGlobal;
+//    private final Individual bestGlobal;
     /**
      * Initializes population of individuals
      *
@@ -30,7 +30,7 @@ public class NSGAIIPopulation extends Population {
             population.add(individual);
         }
         setPopulation(population);
-        bestGlobal = new NSGAIIIndividual(chromosomeLength,maxValue);
+//        bestGlobal = new NSGAIIIndividual(chromosomeLength,maxValue);
     }
 
     protected void fastNonDominatedSorting(){
@@ -147,7 +147,7 @@ public class NSGAIIPopulation extends Population {
      */
     protected void select(){
         fastNonDominatedSorting();
-        saveBest();
+//        saveBest();
 //        System.out.println("Sorted");
         assert (fronts!=null);
         List<Individual> selectedPop = new ArrayList<>(POPULATION_SIZE<<1);
@@ -184,33 +184,45 @@ public class NSGAIIPopulation extends Population {
         }
     }
 
-    public void saveBest(){
-        if (bestGlobal.getFitness()<getFittest(0).getFitness()){
-            Individual tmp = getFittest(0);
-            final int LEN = bestGlobal.getChromosomeLength();
-            for (int i=0;i<LEN;++i){
-                bestGlobal.setGene(i, tmp.getGene(i));
+//    public void saveBest(){
+//        if (bestGlobal.getFitness()<getFittest(0).getFitness()){
+//            Individual tmp = getFittest(0);
+//            final int LEN = bestGlobal.getChromosomeLength();
+//            for (int i=0;i<LEN;++i){
+//                bestGlobal.setGene(i, tmp.getGene(i));
+//            }
+//            bestGlobal.setTime(tmp.getTime());
+//            bestGlobal.setCost(tmp.getCost());
+//            bestGlobal.setFitness(tmp.getFitness());
+//        }
+//
+//    }
+
+//    public void addBestToPopulation(){
+//        final int LEN = bestGlobal.getChromosomeLength();
+//        Individual lastInd = this.getPopulation().get(new Random().nextInt(this.getPopulation().size()));
+//        for (int i=0;i<LEN;++i){
+//            lastInd.setGene(i, bestGlobal.getGene(i));
+//        }
+//        lastInd.setTime(bestGlobal.getTime());
+//        lastInd.setCost(bestGlobal.getCost());
+//        lastInd.setFitness(bestGlobal.getFitness());
+//    }
+
+//    public Individual getBestGlobal(){
+//        return bestGlobal;
+//    }
+
+    public Individual getBestFitness(){
+        Individual best= null;
+        double fitness=0;
+        for (Individual individual: fronts.get(0)){
+            if (individual.getFitness()>fitness){
+                fitness=individual.getFitness();
+                best=individual;
             }
-            bestGlobal.setTime(tmp.getTime());
-            bestGlobal.setCost(tmp.getCost());
-            bestGlobal.setFitness(tmp.getFitness());
         }
-
-    }
-
-    public void addBestToPopulation(){
-        final int LEN = bestGlobal.getChromosomeLength();
-        Individual lastInd = this.getPopulation().get(new Random().nextInt(this.getPopulation().size()));
-        for (int i=0;i<LEN;++i){
-            lastInd.setGene(i, bestGlobal.getGene(i));
-        }
-        lastInd.setTime(bestGlobal.getTime());
-        lastInd.setCost(bestGlobal.getCost());
-        lastInd.setFitness(bestGlobal.getFitness());
-    }
-
-    public Individual getBestGlobal(){
-        return bestGlobal;
+        return best;
     }
 
     @Override

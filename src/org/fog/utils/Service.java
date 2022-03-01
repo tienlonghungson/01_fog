@@ -1,8 +1,16 @@
 package org.fog.utils;
 
+import org.cloudbus.cloudsim.Cloudlet;
+import org.fog.entities.FogDevice;
+
 import java.util.Random;
 
 public class Service {
+
+    /**
+     * rd object
+     */
+    private static final Random rd = new Random();
     /**
      * generate a random number from min (including) to max (including)
      * @param min lower bound
@@ -11,13 +19,42 @@ public class Service {
      */
 	public static int rand(int min, int max) {
         try {
-            Random rn = new Random();
             int range = max - min + 1;
-            return min + rn.nextInt(range);
+            return min + rd.nextInt(range);
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    /**
+     * calculates the cost (G$) when a fogDevice executes a cloudlet
+     * @param cloudlet cloud information
+     * @param fogDevice fogDevice information
+     * @return the cost when a fogDevice executes a cloudlet
+     */
+    public static double calcCost(Cloudlet cloudlet, FogDevice fogDevice) {
+        double cost = 0;
+        //cost includes the processing cost
+        cost += fogDevice.getCharacteristics().getCostPerSecond() * cloudlet.getCloudletLength() / fogDevice.getHost().getTotalMips();
+        // cost includes the memory cost
+        cost += fogDevice.getCharacteristics().getCostPerMem() * cloudlet.getMemRequired();
+        // cost includes the bandwidth cost
+        cost += fogDevice.getCharacteristics().getCostPerBw() * (cloudlet.getCloudletFileSize() + cloudlet.getCloudletOutputSize());
+        return cost;
+    }
+
+    public static double binaryParameter(double idxDist){
+        double u = rd.nextDouble();
+        if (u<=(double)1/2){
+            return Math.pow(2*u,(double)1/(idxDist+1));
+        } else {
+            return (double) 1/Math.pow((2*(1-u)),(double) 1/(idxDist+1));
+        }
+    }
+
+    public static double binaryParameter(){
+        return binaryParameter(1.5);
     }
 
     /**
